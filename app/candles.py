@@ -1,0 +1,2 @@
+# Input: Trades 
+# Output: Candles
