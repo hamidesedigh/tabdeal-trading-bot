@@ -1,42 +1,80 @@
 """
-Build OHLC candles from trades.
+Convert trades to OHLC candles.
 """
+
+from collections import defaultdict
 
 from app.models import Candle, Trade
 
 
-def build_candles(trades: list[Trade]) -> list[Candle]:
+TIMEFRAME_SECONDS = {
+    "1min": 60,
+    "5min": 300,
+    "15min": 900,
+    "30min": 1800,
+    "1h": 3600,
+    "4h": 14400,
+    "1d": 86400,
+}
+
+
+def _bucket_timestamp(timestamp_ms: int, timeframe: str) -> int:
     """
-    Build 1-minute candles from trades.
+    Round timestamp down to the beginning of its timeframe bucket.
+    """
+
+    seconds = timestamp_ms // 1000
+    bucket = seconds // TIMEFRAME_SECONDS[timeframe]
+
+    return bucket * TIMEFRAME_SECONDS[timeframe] * 1000
+
+
+def build_candles(
+    trades: list[Trade],
+    timeframe: str = "1min",
+) -> list[Candle]:
+    """
+    Build OHLC candles from trades.
     """
 
     if not trades:
         return []
 
-    buckets: dict[int, list[Trade]] = {}
+    if timeframe not in TIMEFRAME_SECONDS:
+        raise ValueError(f"Unsupported timeframe: {timeframe}")
+
+    # Ensure trades are ordered by time.
+    trades = sorted(trades, key=lambda trade: trade.timestamp)
+
+    grouped = defaultdict(list)
 
     for trade in trades:
-
-        # 60000 ms = 1 minute
-        minute = trade.timestamp // 60000
-
-        buckets.setdefault(minute, []).append(trade)
+        bucket = _bucket_timestamp(
+            trade.timestamp,
+            timeframe,
+        )
+        grouped[bucket].append(trade)
 
     candles = []
 
-    for minute in sorted(buckets):
+    for timestamp in sorted(grouped.keys()):
 
-        bucket = buckets[minute]
+        bucket_trades = grouped[timestamp]
 
-        candles.append(
-            Candle(
-                open_time=minute * 60000,
-                open=bucket[0].price,
-                high=max(t.price for t in bucket),
-                low=min(t.price for t in bucket),
-                close=bucket[-1].price,
-                volume=sum(t.quantity for t in bucket),
-            )
+        prices = [trade.price for trade in bucket_trades]
+
+        candle = Candle(
+            timestamp=timestamp,
+            open=prices[0],
+            high=max(prices),
+            low=min(prices),
+            close=prices[-1],
+            volume=sum(
+                trade.quantity
+                for trade in bucket_trades
+            ),
         )
+
+        candles.append(candle)
 
     return candles

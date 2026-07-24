@@ -24,7 +24,7 @@ class Candle:
     OHLCV candle.
     """
 
-    open_time: int
+    timestamp: int
 
     open: float
     high: float
