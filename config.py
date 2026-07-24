@@ -1,2 +1,5 @@
-BASE_URL = "https://api.tabdeal.org/r/plots/depth"
-SYMBOL = "BTCIRT"
+BASE_URL = "https://api1.tabdeal.org/r/api/v1/trades"
+
+SYMBOL = "BTC_IRT"
+
+LIMIT = 1000

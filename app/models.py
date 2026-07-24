@@ -17,3 +17,18 @@ class Trade:
     quote_quantity: float
     timestamp: int
     is_buyer_maker: bool
+
+@dataclass(slots=True, frozen=True)
+class Candle:
+    """
+    OHLCV candle.
+    """
+
+    open_time: int
+
+    open: float
+    high: float
+    low: float
+    close: float
+
+    volume: float

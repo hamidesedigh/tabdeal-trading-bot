@@ -2,38 +2,27 @@
 Fetch trades from Tabdeal REST API.
 """
 
-from typing import List
-
 import requests
 
 from app.models import Trade
 
+BASE_URL = "https://api1.tabdeal.org/r/api/v1/trades"
 
-def fetch_trades(url: str) -> List[Trade]:
+
+def build_symbol_params(symbol: str) -> dict:
     """
-    Fetch latest trades from Tabdeal.
-
-    Parameters
-    ----------
-    url : str
-        REST endpoint.
-
-    Returns
-    -------
-    list[Trade]
+    Build query parameters for Tabdeal symbol.
     """
 
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
+    if "_" in symbol:
+        return {"tabdealSymbol": symbol}
 
-    raw_trades = response.json()
-
-    return [normalize_trade(raw) for raw in raw_trades]
+    return {"symbol": symbol}
 
 
 def normalize_trade(raw: dict) -> Trade:
     """
-    Convert Tabdeal trade into the project model.
+    Convert a raw Tabdeal trade to the project model.
     """
 
     return Trade(
@@ -44,3 +33,27 @@ def normalize_trade(raw: dict) -> Trade:
         timestamp=int(raw["time"]),
         is_buyer_maker=bool(raw["isBuyerMaker"]),
     )
+
+
+def fetch_trades(
+    symbol: str,
+    limit: int = 1000,
+) -> list[Trade]:
+    """
+    Fetch latest trades from Tabdeal.
+    """
+
+    params = build_symbol_params(symbol)
+    params["limit"] = limit
+
+    response = requests.get(
+        BASE_URL,
+        params=params,
+        timeout=10,
+    )
+
+    response.raise_for_status()
+
+    raw_trades = response.json()
+
+    return [normalize_trade(raw) for raw in raw_trades]
