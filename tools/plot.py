@@ -2,6 +2,7 @@
 Plot candles stored in SQLite.
 """
 
+from app.indicators.registry import create_overlay
 from app.candles import build_candles
 from app.indicators.sma import sma
 from app.models import OverlayIndicator
@@ -18,27 +19,21 @@ def main():
         timeframe="1h",
     )
 
-    sma20 = sma(
-        candles,
-        period=20,
-    )
-
     print(f"Trades  : {len(trades)}")
     print(f"Candles : {len(candles)}")
     print(type(candles[0]))
     print(candles[0])
-    print(candles[0].__dict__ if hasattr(candles[0], "__dict__") else "No __dict__")
-    print(dir(candles[0]))
 
     plot_candles(
         candles,
         overlays=[
-            OverlayIndicator(
+            create_overlay(
                 name="SMA20",
-                values=sma20,
+                func=sma,
+                candles=candles,
+                period=20,
             ),
         ],
-        title="BTC_IRT - 1 Hour",
     )
 
 
