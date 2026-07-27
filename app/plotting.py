@@ -3,6 +3,11 @@ Plot OHLCV candles using mplfinance.
 """
 
 from __future__ import annotations
+from app.models import (
+    Candle,
+    OverlayIndicator,
+    PanelIndicator,
+)
 
 from datetime import datetime
 from matplotlib.lines import Line2D
@@ -30,12 +35,6 @@ def _indicator_series(
         ],
         index=index,
     )
-
-from app.models import (
-    Candle,
-    OverlayIndicator,
-    PanelIndicator,
-)
 
 
 def plot_candles(
@@ -114,13 +113,13 @@ def plot_candles(
                 f"does not match candles ({candle_count})."
             )
 
-        kwargs = dict(
-            panel=0,
-            ylabel="Price",
-            color=indicator.color,
-            linestyle=indicator.linestyle,
-            width=indicator.linewidth,
-        )
+        kwargs = {
+        "panel": 0,
+        "ylabel": "Price",
+        "color": indicator.color,
+        "linestyle": indicator.linestyle,
+        "width": indicator.linewidth,
+    }
 
         if indicator.plot_type == "scatter":
             kwargs["type"] = "scatter"

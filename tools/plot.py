@@ -3,9 +3,10 @@ Plot candles stored in SQLite.
 """
 
 from app.candles import build_candles
-from app.indicators.ema import ema
 from app.indicators.pipeline import build_indicators
 from app.indicators.sma import sma
+from app.indicators.ema import ema
+from app.indicators.rsi import rsi
 from app.models import IndicatorSpec
 from app.plotting import plot_candles
 from app.storage import load_trades
@@ -37,6 +38,14 @@ def main():
                 func=ema,
                 kwargs={"period": 20},
                 color="purple",
+            ),
+        ],
+        panels=[
+            IndicatorSpec(
+                name="RSI14",
+                func=rsi,
+                kwargs={"period": 14},
+                color="tab:green",
             ),
         ],
     )
