@@ -3,7 +3,8 @@ Common data models.
 """
 
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Sequence , Any
+from collections.abc import Callable
 
 
 @dataclass(slots=True, frozen=True)
@@ -58,3 +59,15 @@ class PanelIndicator:
 
     plot_type: str = "line"
     marker: str = "o"
+
+@dataclass(slots=True, frozen=True)
+class IndicatorSpec:
+    """
+    Specification for computing an indicator.
+    """
+
+    name: str
+
+    func: Callable[..., list[float | None]]
+
+    kwargs: dict[str, Any]
