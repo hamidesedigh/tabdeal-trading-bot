@@ -36,6 +36,11 @@ def build_indicators(
                 name=spec.name,
                 func=spec.func,
                 candles=candles,
+                color=spec.color,
+                linewidth=spec.linewidth,
+                linestyle=spec.linestyle,
+                plot_type=spec.plot_type,
+                marker=spec.marker,
                 **spec.kwargs,
             )
         )
@@ -47,6 +52,11 @@ def build_indicators(
                 name=spec.name,
                 func=spec.func,
                 candles=candles,
+                color=spec.color,
+                linewidth=spec.linewidth,
+                linestyle=spec.linestyle,
+                plot_type=spec.plot_type,
+                marker=spec.marker,
                 **spec.kwargs,
             )
         )

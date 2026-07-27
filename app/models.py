@@ -41,7 +41,7 @@ class OverlayIndicator:
     values: Sequence[float]
 
     color: str = "tab:blue"
-    linewidth: float = 1.5
+    linewidth: float = 1.2
     linestyle: str = "-"
 
     plot_type: str = "line"      # line | scatter
@@ -54,7 +54,7 @@ class PanelIndicator:
     values: Sequence[float]
 
     color: str = "tab:blue"
-    linewidth: float = 1.5
+    linewidth: float = 1.2
     linestyle: str = "-"
 
     plot_type: str = "line"
@@ -63,7 +63,7 @@ class PanelIndicator:
 @dataclass(slots=True, frozen=True)
 class IndicatorSpec:
     """
-    Specification for computing an indicator.
+    Indicator configuration used by the pipeline.
     """
 
     name: str
@@ -71,3 +71,13 @@ class IndicatorSpec:
     func: Callable[..., list[float | None]]
 
     kwargs: dict[str, Any]
+
+    color: str = "tab:blue"
+
+    linewidth: float = 1.2
+
+    linestyle: str = "-"
+
+    plot_type: str = "line"
+
+    marker: str = "o"

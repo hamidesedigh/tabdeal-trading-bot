@@ -5,6 +5,7 @@ Plot OHLCV candles using mplfinance.
 from __future__ import annotations
 
 from datetime import datetime
+from matplotlib.lines import Line2D
 
 import matplotlib.pyplot as plt
 import mplfinance as mpf
@@ -199,6 +200,32 @@ def plot_candles(
         tight_layout=True,
         returnfig=True,
     )
+
+    #
+    # Legend
+    #
+
+    legend_handles = []
+
+    for indicator in overlays:
+
+        legend_handles.append(
+            Line2D(
+                [],
+                [],
+                color=indicator.color,
+                linewidth=indicator.linewidth,
+                linestyle=indicator.linestyle,
+                label=indicator.name,
+            )
+        )
+
+    if legend_handles:
+        axes[0].legend(
+            handles=legend_handles,
+            loc="upper left",
+            frameon=True,
+        )
 
     if show:
         plt.show()

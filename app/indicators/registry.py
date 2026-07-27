@@ -19,6 +19,11 @@ def create_overlay(
     name: str,
     func: Callable[..., list[float | None]],
     candles: list[Candle],
+    color: str | None = None,
+    linewidth: float = 1.2,
+    linestyle: str = "-",
+    plot_type: str = "line",
+    marker: str = "o",
     **kwargs: Any,
 ) -> OverlayIndicator:
     """
@@ -33,6 +38,11 @@ def create_overlay(
     return OverlayIndicator(
         name=name,
         values=values,
+        color=color,
+        linewidth=linewidth,
+        linestyle=linestyle,
+        plot_type=plot_type,
+        marker=marker,
     )
 
 
@@ -41,6 +51,11 @@ def create_panel(
     name: str,
     func: Callable[..., list[float | None]],
     candles: list[Candle],
+    color: str | None = None,
+    linewidth: float = 1.2,
+    linestyle: str = "-",
+    plot_type: str = "line",
+    marker: str = "o",
     **kwargs: Any,
 ) -> PanelIndicator:
     """
@@ -55,4 +70,9 @@ def create_panel(
     return PanelIndicator(
         name=name,
         values=values,
+        color=color,
+        linewidth=linewidth,
+        linestyle=linestyle,
+        plot_type=plot_type,
+        marker=marker,
     )
