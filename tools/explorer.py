@@ -13,7 +13,7 @@ print(f"Trades : {count_trades()}")
 
 print()
 
-print("First 5 trades")
+print("First 2 trades")
 
-for trade in load_trades(limit=5):
+for trade in load_trades(limit=2):
     print(trade)

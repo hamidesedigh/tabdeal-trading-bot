@@ -18,6 +18,7 @@ def main():
         )
 
         print(candles[-1])
+        
 
         time.sleep(60)
 
