@@ -23,11 +23,18 @@ def main():
 
     candles = build_candles(
         trades,
-        timeframe="1h",
+        timeframe="15min",
     )
 
     print(f"Trades  : {len(trades)}")
-    print(f"Candles : {len(candles)} (displaying last {DISPLAY_CANDLE_COUNT})")
+    displayed_candle_count = min(
+        len(candles),
+        DISPLAY_CANDLE_COUNT,
+    )
+    print(
+        f"Candles : {len(candles)} "
+        f"(displaying {displayed_candle_count})"
+    )
 
     overlays, panels = build_indicators(
         candles,

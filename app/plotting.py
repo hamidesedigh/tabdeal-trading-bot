@@ -41,6 +41,17 @@ def _indicator_series(
     )
 
 
+def _has_drawable_values(
+    values: list[float | None],
+) -> bool:
+    """Return whether a series contains at least one finite value."""
+
+    return any(
+        value is not None and not pd.isna(value)
+        for value in values
+    )
+
+
 def plot_candles(
     candles: list[Candle],
     overlays: list[OverlayIndicator] | None = None,
@@ -130,6 +141,11 @@ def plot_candles(
                 f"does not match candles ({source_candle_count})."
             )
 
+        values = indicator.values[-candle_count:]
+
+        if not _has_drawable_values(values):
+            continue
+
         kwargs = {
         "panel": 0,
         "ylabel": "Price",
@@ -143,7 +159,7 @@ def plot_candles(
             kwargs["marker"] = indicator.marker
 
         series = _indicator_series(
-            indicator.values[-candle_count:],
+            values,
             df.index,
         )
 
@@ -157,13 +173,10 @@ def plot_candles(
     # Panel indicators
     #
 
-    panel_index = 2
+    drawable_panels = []
 
     for indicator in panels:
-
-        #
-        # One panel may contain multiple plotted series.
-        #
+        lines = []
 
         for line in indicator.series:
 
@@ -173,6 +186,22 @@ def plot_candles(
                     f"({len(line.values)}) "
                     f"does not match candles ({source_candle_count})."
                 )
+
+            if _has_drawable_values(line.values[-candle_count:]):
+                lines.append(line)
+
+        if lines:
+            drawable_panels.append((indicator, lines))
+
+    panel_index = 2
+
+    for indicator, lines in drawable_panels:
+
+        #
+        # One panel may contain multiple plotted series.
+        #
+
+        for line in lines:
 
             kwargs = dict(
                 panel=panel_index,
@@ -213,7 +242,7 @@ def plot_candles(
         volume_panel_ratio,
     ]
 
-    panel_ratios.extend([1] * len(panels))
+    panel_ratios.extend([1] * len(drawable_panels))
 
     fig, axes = mpf.plot(
         df,
@@ -232,7 +261,10 @@ def plot_candles(
 
     # mplfinance places panel labels on the right by default, where they can
     # be clipped by the figure boundary. Keep them visible on the left.
-    for panel_number, indicator in enumerate(panels, start=2):
+    for panel_number, (indicator, _) in enumerate(
+        drawable_panels,
+        start=2,
+    ):
         panel_axis = axes[panel_number * 2]
         panel_axis.set_ylabel(indicator.name)
         panel_axis.yaxis.set_label_position("left")
