@@ -3,8 +3,8 @@ Common data models.
 """
 
 from dataclasses import dataclass
-from typing import Sequence , Any
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
+from typing import Any
 
 
 @dataclass(slots=True, frozen=True)
@@ -36,6 +36,22 @@ class Candle:
     volume: float
 
 @dataclass(slots=True)
+class PlotSeries:
+    """
+    One drawable series.
+    """
+
+    name: str
+    values: Sequence[float | None]
+
+    color: str = "tab:blue"
+    linewidth: float = 1.2
+    linestyle: str = "-"
+
+    plot_type: str = "line"      # line | scatter | bar
+    marker: str = "o"
+
+@dataclass(slots=True)
 class OverlayIndicator:
     name: str
     values: Sequence[float]
@@ -47,18 +63,23 @@ class OverlayIndicator:
     plot_type: str = "line"      # line | scatter
     marker: str = "o"
 
-
 @dataclass(slots=True)
 class PanelIndicator:
+    """
+    One indicator panel.
+
+    A panel may contain multiple plotted series.
+    """
+
     name: str
-    values: Sequence[float]
 
-    color: str = "tab:blue"
-    linewidth: float = 1.2
-    linestyle: str = "-"
+    series: list[PlotSeries]
 
-    plot_type: str = "line"
-    marker: str = "o"
+    @property
+    def values(self) -> Sequence[float | None]:
+        """Values of the first series, kept for single-series compatibility."""
+
+        return self.series[0].values
 
 @dataclass(slots=True, frozen=True)
 class IndicatorSpec:

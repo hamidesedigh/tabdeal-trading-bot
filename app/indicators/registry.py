@@ -11,6 +11,7 @@ from app.models import (
     Candle,
     OverlayIndicator,
     PanelIndicator,
+    PlotSeries,
 )
 
 
@@ -67,7 +68,7 @@ def create_panel(
         **kwargs,
     )
 
-    return PanelIndicator(
+    series = PlotSeries(
         name=name,
         values=values,
         color=color,
@@ -75,4 +76,9 @@ def create_panel(
         linestyle=linestyle,
         plot_type=plot_type,
         marker=marker,
+    )
+
+    return PanelIndicator(
+        name=name,
+        series=[series],
     )

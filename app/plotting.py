@@ -45,6 +45,7 @@ def plot_candles(
     figsize: tuple[int, int] = (14, 8),
     price_panel_ratio: int = 4,
     volume_panel_ratio: int = 1,
+    max_candles: int | None = None,
     show: bool = True,
 ):
     """
@@ -66,6 +67,9 @@ def plot_candles(
         Height ratio of price panel.
     volume_panel_ratio
         Height ratio of volume panel.
+    max_candles
+        Number of most recent candles to display. Indicators are expected to
+        be calculated from the full candle list before this display slice.
     show
         If True call plt.show().
         Otherwise only return figure and axes.
@@ -76,6 +80,14 @@ def plot_candles(
 
     if not candles:
         raise ValueError("No candles to plot.")
+
+    if max_candles is not None and max_candles <= 0:
+        raise ValueError("max_candles must be positive.")
+
+    source_candle_count = len(candles)
+
+    if max_candles is not None:
+        candles = candles[-max_candles:]
 
     data = []
 
@@ -106,11 +118,11 @@ def plot_candles(
 
     for indicator in overlays:
 
-        if len(indicator.values) != candle_count:
+        if len(indicator.values) != source_candle_count:
             raise ValueError(
                 f"{indicator.name}: indicator length "
                 f"({len(indicator.values)}) "
-                f"does not match candles ({candle_count})."
+                f"does not match candles ({source_candle_count})."
             )
 
         kwargs = {
@@ -126,7 +138,7 @@ def plot_candles(
             kwargs["marker"] = indicator.marker
 
         series = _indicator_series(
-            indicator.values,
+            indicator.values[-candle_count:],
             df.index,
         )
 
@@ -136,7 +148,6 @@ def plot_candles(
                 **kwargs,
             )
         )
-
     #
     # Panel indicators
     #
@@ -145,36 +156,50 @@ def plot_candles(
 
     for indicator in panels:
 
-        if len(indicator.values) != candle_count:
-            raise ValueError(
-                f"{indicator.name}: indicator length "
-                f"({len(indicator.values)}) "
-                f"does not match candles ({candle_count})."
+        #
+        # One panel may contain multiple plotted series.
+        #
+
+        for line in indicator.series:
+
+            if len(line.values) != source_candle_count:
+                raise ValueError(
+                    f"{line.name}: indicator length "
+                    f"({len(line.values)}) "
+                    f"does not match candles ({source_candle_count})."
+                )
+
+            kwargs = dict(
+                panel=panel_index,
+                ylabel=indicator.name,
+                color=line.color,
+                linestyle=line.linestyle,
+                width=line.linewidth,
+                secondary_y=False,
             )
 
-        kwargs = dict(
-            panel=panel_index,
-            ylabel=indicator.name,
-            color=indicator.color,
-            linestyle=indicator.linestyle,
-            width=indicator.linewidth,
-        )
+            if line.plot_type == "scatter":
+                kwargs["type"] = "scatter"
+                kwargs["marker"] = line.marker
 
-        if indicator.plot_type == "scatter":
-            kwargs["type"] = "scatter"
-            kwargs["marker"] = indicator.marker
+            elif line.plot_type == "bar":
+                kwargs["type"] = "bar"
 
-        series = _indicator_series(
-            indicator.values,
-            df.index,
-        )
-
-        addplots.append(
-            mpf.make_addplot(
-                series,
-                **kwargs,
+            series = _indicator_series(
+                line.values[-candle_count:],
+                df.index,
             )
-        )
+
+            addplots.append(
+                mpf.make_addplot(
+                    series,
+                    **kwargs,
+                )
+            )
+
+        #
+        # next indicator gets its own panel
+        #
 
         panel_index += 1
 
@@ -199,6 +224,14 @@ def plot_candles(
         tight_layout=True,
         returnfig=True,
     )
+
+    # mplfinance places panel labels on the right by default, where they can
+    # be clipped by the figure boundary. Keep them visible on the left.
+    for panel_number, indicator in enumerate(panels, start=2):
+        panel_axis = axes[panel_number * 2]
+        panel_axis.set_ylabel(indicator.name)
+        panel_axis.yaxis.set_label_position("left")
+        panel_axis.yaxis.tick_left()
 
     #
     # Legend

@@ -7,14 +7,19 @@ from app.indicators.pipeline import build_indicators
 from app.indicators.sma import sma
 from app.indicators.ema import ema
 from app.indicators.rsi import rsi
+from app.indicators.macd_panel import create_macd_panel
 from app.models import IndicatorSpec
 from app.plotting import plot_candles
 from app.storage import load_trades
 
+DISPLAY_CANDLE_COUNT = 60
+
 
 def main():
 
-    trades = load_trades(limit=5000)
+    # Calculate indicators from all available history so the displayed range
+    # has enough warm-up data for RSI, MACD, and moving averages.
+    trades = load_trades()
 
     candles = build_candles(
         trades,
@@ -22,7 +27,7 @@ def main():
     )
 
     print(f"Trades  : {len(trades)}")
-    print(f"Candles : {len(candles)}")
+    print(f"Candles : {len(candles)} (displaying last {DISPLAY_CANDLE_COUNT})")
 
     overlays, panels = build_indicators(
         candles,
@@ -50,11 +55,16 @@ def main():
         ],
     )
 
+    panels.append(
+        create_macd_panel(candles)
+    )
+
     plot_candles(
         candles,
         overlays=overlays,
         panels=panels,
         title="BTC_IRT",
+        max_candles=DISPLAY_CANDLE_COUNT,
     )
 
 
