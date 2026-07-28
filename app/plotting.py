@@ -10,12 +10,16 @@ from app.models import (
 )
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from matplotlib.lines import Line2D
 
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 import pandas as pd
 import numpy as np
+
+
+DISPLAY_TIMEZONE = ZoneInfo("Asia/Tehran")
 
 
 def _indicator_series(
@@ -95,7 +99,8 @@ def plot_candles(
         data.append(
             {
                 "Date": datetime.fromtimestamp(
-                    candle.timestamp / 1000
+                    candle.timestamp / 1000,
+                    tz=DISPLAY_TIMEZONE,
                 ),
                 "Open": candle.open,
                 "High": candle.high,

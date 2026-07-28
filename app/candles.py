@@ -3,6 +3,8 @@ Convert trades to OHLC candles.
 """
 
 from collections import defaultdict
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from app.models import Candle, Trade
 
@@ -17,16 +19,36 @@ TIMEFRAME_SECONDS = {
     "1d": 86400,
 }
 
+EXCHANGE_TIMEZONE = ZoneInfo("Asia/Tehran")
+
 
 def _bucket_timestamp(timestamp_ms: int, timeframe: str) -> int:
     """
-    Round timestamp down to the beginning of its timeframe bucket.
+    Round timestamp down to the beginning of its timeframe bucket in the
+    exchange timezone, then return the boundary as a UTC epoch timestamp.
     """
 
-    seconds = timestamp_ms // 1000
-    bucket = seconds // TIMEFRAME_SECONDS[timeframe]
+    local_time = datetime.fromtimestamp(
+        timestamp_ms / 1000,
+        tz=EXCHANGE_TIMEZONE,
+    )
+    local_midnight = local_time.replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+    elapsed_seconds = int(
+        (local_time - local_midnight).total_seconds()
+    )
+    bucket_seconds = (
+        elapsed_seconds // TIMEFRAME_SECONDS[timeframe]
+    ) * TIMEFRAME_SECONDS[timeframe]
+    bucket_start = local_midnight + timedelta(
+        seconds=bucket_seconds
+    )
 
-    return bucket * TIMEFRAME_SECONDS[timeframe] * 1000
+    return int(bucket_start.timestamp() * 1000)
 
 
 def build_candles(

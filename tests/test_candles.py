@@ -3,6 +3,7 @@ Tests for app.candles.
 """
 
 import pytest
+from datetime import datetime, timezone
 
 from app.candles import build_candles
 from app.models import Trade
@@ -135,6 +136,38 @@ def test_five_minute_timeframe():
     assert candle.close == 120
     assert candle.high == 120
     assert candle.low == 100
+
+
+def test_hourly_candles_align_to_tehran_hour_boundaries():
+    """Hourly candles should start at a whole hour in Asia/Tehran."""
+
+    trades = [
+        make_trade(
+            1,
+            int(datetime(2026, 7, 24, 7, 35, tzinfo=timezone.utc).timestamp() * 1000),
+            100,
+        ),
+        make_trade(
+            2,
+            int(datetime(2026, 7, 24, 8, 29, tzinfo=timezone.utc).timestamp() * 1000),
+            110,
+        ),
+        make_trade(
+            3,
+            int(datetime(2026, 7, 24, 8, 30, tzinfo=timezone.utc).timestamp() * 1000),
+            120,
+        ),
+    ]
+
+    candles = build_candles(trades, timeframe="1h")
+
+    assert [candle.timestamp for candle in candles] == [
+        int(datetime(2026, 7, 24, 7, 30, tzinfo=timezone.utc).timestamp() * 1000),
+        int(datetime(2026, 7, 24, 8, 30, tzinfo=timezone.utc).timestamp() * 1000),
+    ]
+    assert candles[0].open == 100
+    assert candles[0].close == 110
+    assert candles[1].open == 120
 
 
 def test_invalid_timeframe():
