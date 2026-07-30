@@ -29,6 +29,10 @@ def build_indicators(
     overlay_models: list[OverlayIndicator] = []
     panel_models: list[PanelIndicator] = []
 
+    #
+    # Overlay indicators
+    #
+
     for spec in overlays or []:
 
         overlay_models.append(
@@ -45,7 +49,31 @@ def build_indicators(
             )
         )
 
+    #
+    # Panel indicators
+    #
+
     for spec in panels or []:
+
+        #
+        # Some indicators (e.g. MACD) build a complete
+        # PanelIndicator by themselves.
+        #
+
+        result = spec.func(
+            candles,
+            **spec.kwargs,
+        )
+
+        if isinstance(result, PanelIndicator):
+
+            panel_models.append(result)
+
+            continue
+
+        #
+        # Standard single-line panel.
+        #
 
         panel_models.append(
             create_panel(

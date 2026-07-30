@@ -23,7 +23,7 @@ def main():
 
     candles = build_candles(
         trades,
-        timeframe="15min",
+        timeframe="1h",
     )
 
     print(f"Trades  : {len(trades)}")
