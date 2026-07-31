@@ -1,19 +1,17 @@
 """
-Market state models.
+State models.
 """
 
 from dataclasses import dataclass
+from collections.abc import Sequence
 
 
 @dataclass(slots=True)
-class StatePoint:
+class StateSeries:
     """
-    Market state for one candle.
+    One calculated market state.
     """
 
-    timestamp: int
+    name: str
 
-    direction: float
-    strength: float
-    quality: float
-    efficiency: float
+    values: Sequence[float | None]

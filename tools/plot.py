@@ -7,6 +7,7 @@ from app.indicators.pipeline import build_indicators
 from app.indicators.sma import sma
 from app.indicators.ema import ema
 from app.indicators.rsi import rsi
+from app.indicators.adx import adx
 from app.indicators.macd_panel import create_macd_panel
 from app.models import IndicatorSpec
 from app.plotting import plot_candles
