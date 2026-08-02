@@ -1,5 +1,7 @@
 """
-Trend strength state.
+Strength state.
+
+Strength is represented by the ADX indicator.
 """
 
 from __future__ import annotations
@@ -14,7 +16,11 @@ def strength(
     period: int = 14,
 ) -> StateSeries:
     """
-    Trend strength based on ADX.
+    Calculate trend strength.
+
+    Returns
+    -------
+    StateSeries
     """
 
     values = adx(

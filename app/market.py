@@ -11,13 +11,25 @@ from app.storage import (
     load_trades,
 )
 
+def load_market(
+    timeframe="1min",
+) -> list[Candle]:
+    # Market Data Pipeline
+
+    trades = load_trades()
+
+    return build_candles(
+        trades,
+        timeframe,
+    )
+
 
 def run_cycle(
     symbol: str,
     limit: int,
 ) -> list[Candle]:
     """
-    Execute one trading cycle.
+    Execute one trading cycle. Live Engine
     """
 
     initialize_database()

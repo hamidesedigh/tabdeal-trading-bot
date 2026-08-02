@@ -35,7 +35,7 @@ def direction(
 
         window = closes[i - period + 1 : i + 1]
 
-        slope, _ = linear_regression(window)
+        slope, _, _  = linear_regression(window)
 
         values.append(slope)
 

@@ -4,7 +4,7 @@ Application entry point.
 
 import time
 
-from app.engine import run_cycle
+from app.market import run_cycle
 from config import LIMIT, SYMBOL
 
 

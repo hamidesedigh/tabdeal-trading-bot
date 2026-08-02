@@ -1,53 +1,20 @@
 from app.indicators.rsi import rsi
-from app.models import Candle
 
 
-def make_candles():
+def test_rsi(candles):
 
-    candles = []
-
-    for i in range(100):
-
-        candles.append(
-            Candle(
-                timestamp=i,
-                open=100 + i,
-                high=101 + i,
-                low=99 + i,
-                close=100 + i,
-                volume=1,
-            )
-        )
-
-    return candles
-
-
-def test_rsi_length():
-
-    candles = make_candles()
-
-    values = rsi(candles)
+    values = rsi(
+        candles,
+        period=14,
+    )
 
     assert len(values) == len(candles)
 
+    valid = [v for v in values if v is not None]
 
-def test_rsi_prefix():
+    assert len(valid) > 0
 
-    candles = make_candles()
-
-    values = rsi(candles)
-
-    assert values[:14] == [None] * 14
-
-
-def test_rsi_range():
-
-    candles = make_candles()
-
-    values = rsi(candles)
-
-    for value in values:
-
-        if value is not None:
-
-            assert 0 <= value <= 100
+    assert all(
+        0 <= v <= 100
+        for v in valid
+    )

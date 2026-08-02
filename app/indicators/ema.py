@@ -2,7 +2,59 @@
 Exponential Moving Average (EMA).
 """
 
+from __future__ import annotations
+
 from app.models import Candle
+from app.indicators.utils import closing_prices
+
+
+def ema_values(
+    values: list[float],
+    period: int,
+) -> list[float | None]:
+    """
+    Compute EMA over a numeric series.
+
+    Parameters
+    ----------
+    values
+        Input numeric values.
+
+    period
+        EMA period.
+
+    Returns
+    -------
+    list[float | None]
+    """
+
+    if period <= 0:
+        raise ValueError("period must be positive.")
+
+    if len(values) < period:
+        return [None] * len(values)
+
+    multiplier = 2 / (period + 1)
+
+    result: list[float | None] = [None] * len(values)
+
+    first = sum(values[:period]) / period
+
+    result[period - 1] = first
+
+    previous = first
+
+    for i in range(period, len(values)):
+
+        previous = (
+            (values[i] - previous)
+            * multiplier
+            + previous
+        )
+
+        result[i] = previous
+
+    return result
 
 
 def ema(
@@ -10,49 +62,10 @@ def ema(
     period: int,
 ) -> list[float | None]:
     """
-    Compute the Exponential Moving Average.
-
-    Parameters
-    ----------
-    candles
-        Input candles.
-    period
-        EMA period.
-
-    Returns
-    -------
-    list[float | None]
-        EMA values aligned with candles.
+    Compute EMA from candle closing prices.
     """
 
-    if period <= 0:
-        raise ValueError("period must be positive.")
-
-    if len(candles) < period:
-        return [None] * len(candles)
-
-    closes = [c.close for c in candles]
-
-    multiplier = 2 / (period + 1)
-
-    values: list[float | None] = [None] * len(closes)
-
-    #
-    # First EMA starts from SMA(period)
-    #
-    first = sum(closes[:period]) / period
-    values[period - 1] = first
-
-    previous = first
-
-    for i in range(period, len(closes)):
-
-        current = (
-            (closes[i] - previous) * multiplier
-            + previous
-        )
-
-        values[i] = current
-        previous = current
-
-    return values
+    return ema_values(
+        closing_prices(candles),
+        period,
+    )

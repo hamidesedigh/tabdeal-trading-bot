@@ -2,8 +2,14 @@
 Moving Average Convergence Divergence (MACD).
 """
 
+from __future__ import annotations
+
 from app.models import Candle
-from app.indicators.ema import ema
+
+from app.indicators.ema import (
+    ema,
+    ema_values,
+)
 
 
 def macd(
@@ -17,10 +23,11 @@ def macd(
     list[float | None],
 ]:
     """
-    Return:
-        macd line,
-        signal line,
-        histogram
+    Return
+
+    - MACD line
+    - Signal line
+    - Histogram
     """
 
     fast = ema(
@@ -35,63 +42,73 @@ def macd(
 
     macd_line: list[float | None] = []
 
-    #
-    # MACD = EMA(fast) - EMA(slow)
-    #
+    for fast_value, slow_value in zip(
+        fast,
+        slow,
+    ):
 
-    for f, s in zip(fast, slow):
-
-        if f is None or s is None:
+        if (
+            fast_value is None
+            or slow_value is None
+        ):
             macd_line.append(None)
         else:
-            macd_line.append(f - s)
+            macd_line.append(
+                fast_value - slow_value
+            )
 
-    # The signal EMA starts only after the MACD line becomes valid. Feeding
-    # placeholder zeroes into EMA would create a false signal line before
-    # there is enough price history.
-    first_valid_index = next(
+    #
+    # Signal EMA
+    #
+
+    first_valid = next(
         (
             index
             for index, value in enumerate(macd_line)
             if value is not None
         ),
-        len(candles),
+        len(macd_line),
     )
 
-    valid_macd_candles = [
-        Candle(
-            timestamp=candle.timestamp,
-            open=value,
-            high=value,
-            low=value,
-            close=value,
-            volume=0,
-        )
-        for candle, value in zip(
-            candles[first_valid_index:],
-            macd_line[first_valid_index:],
-        )
+    valid_macd = [
+        value
+        for value in macd_line[first_valid:]
         if value is not None
     ]
 
-    valid_signal = ema(
-        valid_macd_candles,
-        period=signal_period,
+    valid_signal = ema_values(
+        valid_macd,
+        signal_period,
     )
 
-    signal: list[float | None] = [None] * len(candles)
+    signal: list[float | None] = [None] * len(macd_line)
 
-    for index, value in enumerate(valid_signal, start=first_valid_index):
+    for index, value in enumerate(
+        valid_signal,
+        start=first_valid,
+    ):
         signal[index] = value
+
+    #
+    # Histogram
+    #
 
     histogram: list[float | None] = []
 
-    for m, s in zip(macd_line, signal):
+    for macd_value, signal_value in zip(
+        macd_line,
+        signal,
+    ):
 
-        if m is None or s is None:
+        if (
+            macd_value is None
+            or signal_value is None
+        ):
             histogram.append(None)
         else:
-            histogram.append(m - s)
+            histogram.append(
+                macd_value - signal_value
+            )
 
     return (
         macd_line,

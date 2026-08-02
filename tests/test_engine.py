@@ -1,10 +1,10 @@
 """
-Tests for app.engine.
+Tests for app.market.
 """
 
 from unittest.mock import patch
 
-from app.engine import run_cycle
+from app.market import run_cycle
 from app.models import Candle, Trade
 
 
@@ -21,10 +21,10 @@ def make_trade(trade_id: int) -> Trade:
     )
 
 
-@patch("app.engine.load_trades")
-@patch("app.engine.insert_trades")
-@patch("app.engine.fetch_trades")
-@patch("app.engine.initialize_database")
+@patch("app.market.load_trades")
+@patch("app.market.insert_trades")
+@patch("app.market.fetch_trades")
+@patch("app.market.initialize_database")
 def test_run_cycle(
     mock_initialize,
     mock_fetch,

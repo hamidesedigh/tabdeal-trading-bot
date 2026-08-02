@@ -117,4 +117,57 @@ class Signal:
 
     strategy: str
 
+    score: float
+    
     reason: str = ""
+
+@dataclass(slots=True, frozen=True)
+class SymbolFilters:
+    """
+    Trading rules for a symbol, parsed from Tabdeal's exchangeInfo.
+
+    All prices/quantities are in the units Tabdeal's API uses (base asset
+    for quantity, quote asset for price/notional).
+    """
+
+    symbol: str
+    base_asset: str
+    quote_asset: str
+
+    tick_size: float        # PRICE_FILTER: minimum price increment
+    min_price: float
+    max_price: float
+
+    step_size: float        # LOT_SIZE / MARKET_LOT_SIZE: minimum qty increment
+    min_qty: float
+    max_qty: float
+
+    min_notional: float     # MIN_NOTIONAL: minimum order value (price * qty)
+
+@dataclass(slots=True, frozen=True)
+class OrderRequest:
+    """
+    A fully-sized, exchange-valid order ready to submit.
+    """
+
+    symbol: str
+    side: str          # BUY | SELL
+    type: str          # MARKET | LIMIT
+
+    quantity: float
+    price: float | None = None   # required for LIMIT orders
+
+    reason: str = ""
+
+@dataclass(slots=True, frozen=True)
+class OrderResult:
+    """
+    Outcome of attempting to place an order.
+    """
+
+    accepted: bool
+    order: OrderRequest
+
+    exchange_order_id: int | None = None
+    raw_response: dict | None = None
+    rejection_reason: str = ""
