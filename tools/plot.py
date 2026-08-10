@@ -1,5 +1,6 @@
 """
 Plot candles stored in SQLite.
+python -m tools.plot
 """
 
 from app.candles import build_candles
