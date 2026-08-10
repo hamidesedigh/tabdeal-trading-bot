@@ -18,6 +18,8 @@ Usage:
 
 import time
 
+from dotenv import load_dotenv
+
 from app.candles import build_candles
 from app.collector import fetch_trades
 from app.exchange import ExchangeError, TabdealExchange
@@ -95,6 +97,8 @@ def run_once(
 
 
 def main() -> None:
+
+    load_dotenv()
 
     exchange = TabdealExchange(dry_run=DRY_RUN)
     risk_manager = RiskManager(config=RiskConfig())
